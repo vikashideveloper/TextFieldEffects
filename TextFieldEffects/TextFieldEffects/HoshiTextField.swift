@@ -34,6 +34,13 @@ import UIKit
         }
     }
     
+    @IBInspectable dynamic open var isRequired: Bool = false {
+        didSet {
+            updatePlaceholder()
+
+        }
+    }
+
     /**
      The color of the placeholder text.
 
@@ -113,7 +120,7 @@ import UIKit
     }
     
     override open func animateViewsForTextDisplay() {
-        if let text = text, text.isEmpty {
+        if text!.isEmpty {
             UIView.animate(withDuration: 0.35, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 2.0, options: .beginFromCurrentState, animations: ({
                 self.layoutPlaceholderInTextRect()
                 self.placeholderLabel.alpha = 1
@@ -122,8 +129,6 @@ import UIKit
             })
             
             activeBorderLayer.frame = self.rectForBorder(self.borderThickness.active, isFilled: false)
-            inactiveBorderLayer.frame = self.rectForBorder(self.borderThickness.inactive, isFilled: true)
-
         }
     }
     
@@ -138,8 +143,20 @@ import UIKit
     }
     
     private func updatePlaceholder() {
-        placeholderLabel.text = placeholder
-        placeholderLabel.textColor = placeholderColor
+        if isRequired {
+            placeholderLabel.textColor = placeholderColor
+
+            let string = "\(placeholder ?? "")*"
+            let range = (string as NSString).range(of: String("*"))
+            let attributedString = NSMutableAttributedString(string: string)
+            attributedString.addAttribute(.foregroundColor, value: UIColor.red, range: range)
+            placeholderLabel.attributedText = attributedString
+        } else {
+            placeholderLabel.textColor = placeholderColor
+
+            placeholderLabel.text = placeholder
+        }
+        
         placeholderLabel.sizeToFit()
         layoutPlaceholderInTextRect()
         
